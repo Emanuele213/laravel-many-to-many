@@ -13,6 +13,10 @@
             <th class="text-center" scope="col">ID</th>
             <th class="text-center" scope="col">Image</th>
             <th class="text-center" scope="col">Category</th>
+            {{-- serve per non far vedere l'array se e' vuoto --}}
+            @if ($post->tags->all())
+                <th class="text-center" scope="col">Tags</th>
+            @endif
             <th class="text-center" scope="col">Edit</th>
             <th class="text-center" scope="col">Delete</th>
             </tr>
@@ -20,13 +24,23 @@
         <tbody class="table-group-divider">
             <tr>
                 <h1>{{ $post->title }}</h1>
-                <th class="text-center" scope="row">{{ $post->id}}</th>
-                <th class="text-center" scope="row"><img src="{{ $post->image}}" alt="{{ $post->title }}" width="100px" height="100px"></th>
-                <td class="text-center">{{ $post->category->name ?? ''}}</td>
+                <td class="text-center" scope="row">{{ $post->id}}</td>
+                <td class="text-center" scope="row"><img src="{{ $post->image}}" alt="{{ $post->title }}" width="100px" height="100px"></td>
+                <td class="text-center">
+                    @if ($post->category)
+                        <a href="{{ route('admin.categories.show', ['category' => $post->category]) }}">{{ $post->category->name ?? '' }}</a>
+                    @endif
+                </td>
+                <td class="text-center">
+                    @foreach ($post->tags as $tag)
+                    {{-- {{ route('admin.tags.show', ['tag' => $post->tag] )}} --}}
+                        <a href="">{{ $tag->name }}{{ $loop->last ? '' : ', ' }}</a>
+                    @endforeach
+                </td>
                 {{-- <th class="text-center" scope="row"><img src="{{ asset('storage/' . $post->uploaded_img )}}" width="100px" height="100px"></th> --}}
                 <td class="text-center"><a href="{{ route('admin.posts.edit', ['post' => $post]) }}" class="btn btn-warning"><i class="fa-solid fa-pencil"></i></a></td>
                 <td class="text-center">
-                    <button class="btn btn-danger btn-delete-me" data-id="{{ $post }}"><i class="fa-solid fa-trash-can"></i></button>
+                    <button class="btn btn-danger btn-delete-me" data-id="{{ $post->slug }}"><i class="fa-solid fa-trash-can"></i></button>
                 </td>
             </tr>
         </tbody>

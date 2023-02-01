@@ -33,7 +33,6 @@
             @endforeach
         </tbody>
     </table>
-    c
 
     @include('admin.partials.delete_confirmation', ['delete_name' => 'category'])
 @endsection

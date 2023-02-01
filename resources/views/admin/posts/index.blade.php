@@ -4,7 +4,7 @@
     @if (session('success_delete'))
     <div class="alert alert-success">
         {{-- {{ session('success_delete') }} --}}
-        Il post con id {{ session('success_delete') }} e' stato eliminato correttamente
+        Il post con id "{{ session('success_delete') }}" e' stato eliminato correttamente
     </div>
     @endif
     <table class="table table-dark">
@@ -26,10 +26,15 @@
                 <th class="text-center" scope="row">{{ $post->id}}</th>
                 <td class="text-center">{{ $post->slug }}</td>
                 <td class="text-center">{{ $post->title }}</td>
-                <td class="text-center">{{ $post->category->name ?? '' }}</td>
+                <td class="text-center">
+                    @if ($post->category)
+                        <a href="{{ route('admin.categories.show', ['category' => $post->category]) }}">{{ $post->category->name ?? '' }}</a>
+                    @endif
+                </td>
                 <td class="text-center">
                     @foreach ($post->tags as $tag)
-                    {{ $tag->name }}{{ $loop->last ? '' : ', ' }}
+                    {{-- {{ route('admin.tags.show', ['tag' => $post->tag] )}} --}}
+                        <a href="">{{ $tag->name }}{{ $loop->last ? '' : ', ' }}</a>
                     @endforeach
                 </td>
                 <td class="text-center"><a href="{{ route('admin.posts.show', ['post' => $post]) }}" class="btn btn-primary"><i class="fa-solid fa-eye"></i></a></td>

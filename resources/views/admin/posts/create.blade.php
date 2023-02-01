@@ -34,7 +34,7 @@
             <label for="category_id" class="form-label">Categoria</label>
             <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id">
                 @foreach ($categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    <option value="{{ $category->id }}" @if ($category->id == old('category_id', $post->category->id)) selected @endif>{{ $category->name }}</option>
                 @endforeach
             </select>
             <div class="invalid-feedback">
@@ -46,6 +46,32 @@
                     </ul>
                 @enderror
             </div>
+        </div>
+
+        <div class="col-12">
+            <fieldset>
+                <legend>Tags</legend>
+                @foreach ($tags as $tag)
+                    <div class="form-check">
+                        <input
+                            class="form-check-input @error ("tags.$loop->index") is-invalid @enderror"
+                            name="tags[]"
+                            type="checkbox"
+                            value="{{$tag->id}}"
+                            id="tag-{{$tag->id}}"
+                            @if(in_array($tag->id, old('tags', [])))
+                            checked
+                            @endif
+                        >
+                        <label class="form-check-label" for="tag-{{$tag->id}}">
+                            {{ $tag->name }}
+                        </label>
+                    </div>
+                @endforeach
+                @if ($errors->has('tags') || $errors->has('tags.*'))
+                    Tags non valid
+                @endif
+            </fieldset>
         </div>
 
         <div class="col-md-12">

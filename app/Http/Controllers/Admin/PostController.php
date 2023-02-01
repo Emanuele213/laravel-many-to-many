@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Category;
+use App\Tag;
 use App\Post;
+use App\Category;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
@@ -19,6 +20,8 @@ class PostController extends Controller
                 ],
         'title'         => 'required|string|max:100',
         'category_id'   => 'required|integer|exists:categories,id',
+        'tags'          => 'array',
+        'tags.*'        => 'integer|exists:tags,id',
         'image'         => 'string|max:100',
         //'uploaded_img'  => 'image|max:1024',
         'content'       => 'string',
@@ -49,7 +52,12 @@ class PostController extends Controller
     public function create()
     {
         $categories = Category::all('id', 'name');
-        return view('admin.posts.create', [ 'categories' => $categories]);
+        $tags = Tag::all();
+        return view('admin.posts.create',
+        [
+            'categories' => $categories,
+            'tags'       => $tags,
+        ]);
     }
 
     /**
@@ -72,11 +80,15 @@ class PostController extends Controller
         $post = new Post;
         $post ->slug              = $data['slug'];
         $post ->title             = $data['title'];
+        $post ->category_id       = $data['category_id'];
         $post ->image             = $data['image'];
         //$post ->uploaded_img      = $img_path;
         $post ->content           = $data['content'];
         $post ->excerpt           = $data['excerpt'];
         $post ->save();
+
+        // associamo il post appena creato ai tag
+        $post->tags()->attach($data['tags']);
 
         //ridirezionare  (e non ritornare una view)
         return redirect()->route('admin.posts.show', ['post' => $post]);
@@ -101,7 +113,14 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        return view('admin.posts.edit', compact('post'));
+        $categories = Category::all('id', 'name');
+        $tags = Tag::all();
+        return view('admin.posts.edit',
+        [
+            'post'       => $post,
+            'categories' => $categories,
+            'tags'       => $tags,
+        ]);
     }
 
     /**
@@ -116,6 +135,7 @@ class PostController extends Controller
         //validation
         // $this->validations['slug'][]=Rule::unique('post')->ignore($post);
         // $request->validate($this->validations);
+
         $request->validate([
             'slug'      => [
                 'required',
@@ -123,11 +143,14 @@ class PostController extends Controller
                 'max:100',
                 Rule::unique('posts')->ignore($post),
             ],
-            'title'     => 'required|string|max:100',
-            'image'     => 'url|max:100',
+            'title'         => 'required|string|max:100',
+            'category_id'   => 'required|integer|exists:categories,id',
+            'tags'          => 'array',
+            'tags.*'        => 'integer|exists:tags,id',
+            'image'         => 'string|max:100',
             //'uploaded_img'  => 'image|max:1024',
-            'content'   => 'string',
-            'excerpt'   => 'string',
+            'content'       => 'nullable|string',
+            'excerpt'       => 'nullable|string',
         ]);
         //
         $data = $request->all();
@@ -139,6 +162,8 @@ class PostController extends Controller
         $post ->content = $data['content'];
         $post ->excerpt = $data['excerpt'];
         $post ->update();
+
+        $post->tags()->sync($data['tags']);
 
         //ridirezionare  (e non ritornare una view)
         return redirect()->route('admin.posts.show', ['post' => $post]);
@@ -152,6 +177,11 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        //metodo 1 miglore questo
+        $post->tags()->detach(); //senza passare valore elmina tutte le righe
+        //metodo 2
+        //$post->tags()->sync([]); //un post che non e' associato niente
+
         $post->delete();
 
         return redirect()->route('admin.posts.index')->with('success_delete', $post->id);

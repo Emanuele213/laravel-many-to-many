@@ -30,6 +30,8 @@ Route::middleware('auth')
     ->group(function () {
         Route::get('/', 'PageController@dashboard')->name('dashboard');
         Route::resource('posts', 'PostController');
+        Route::get('categories/slug', 'CategoryController@slug')->name('slug');
         Route::resource('categories', 'CategoryController');
+        Route::resource('tags', 'TagController');
 });
 
